@@ -1,0 +1,37 @@
+services:
+  mysql:
+    image: mysql:9
+    restart: always
+    ports:
+      - 3306:3306
+    environment:
+      MYSQL_DATABASE: 'todo'
+      MYSQL_USER: 'todo'
+      MYSQL_PASSWORD: 'todo'
+      MYSQL_ROOT_PASSWORD: 'root'
+      MYSQL_ALLOW_EMPTY_PASSWORD: 'yes'
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+      timeout: 30s
+      interval: 5s
+      retries: 10
+    networks:
+      - default
+  nest-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/app:rw
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - default
+
+networks:
+  default:
+    driver: bridge
